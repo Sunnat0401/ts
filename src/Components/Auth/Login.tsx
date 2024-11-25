@@ -7,8 +7,17 @@ import { z } from 'zod'
 import { loginScheme } from '@/lib/Validation'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '../ui/form'
-
+import { signInWithEmailAndPassword } from 'firebase/auth'
+import { Navigate, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { auth } from '@/Firebase/Firebase'
+import { RiAlertLine } from "react-icons/ri";
+import { Alert, AlertDescription, AlertTitle } from '../ui/alert'
+import FillLoading from '../Shared/Fill-loading'
 const Login = () => {
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState("")
+  const navigate = useNavigate()
     const {setAuth} = useAuthState()
     const form = useForm<z.infer<typeof loginScheme>>({
       resolver : zodResolver(loginScheme) ,
@@ -16,25 +25,35 @@ const Login = () => {
     })
     const onSubmit = async(values: z.infer<typeof loginScheme>) =>{
     const {email , password} = values
-      
+    setIsLoading(true)   
+    try{
+   const res  = await signInWithEmailAndPassword(auth , email , password)
+   navigate('/')
+    } catch(error) {
+      const result = error as Error
+      setError(result.message)
+    }finally{
+      setIsLoading(false)
+    }
     }
   return (
     <div className='flex flex-col'>
+    {isLoading &&   <FillLoading/>}
       <h2 className='text-xl font-bold'>Login</h2>
       <p className='text-muted-foreground'>
         Don't have an account ? {""}
         <span className='text-blue-500 cursor-pointer hover:underline' onClick={()=>setAuth("register")}>Sign in</span>
       </p>
       <Separator className='my-3' />
-      {/* <div className='flex flex-col gap-1'>
-       <span  className='mb-2'>Email</span>
-       <Input placeholder='example@gmail.com'/>
-      </div>
-      <div className='flex flex-col gap-2 mt-2'>
-       <span>Password</span>
-       <Input placeholder='*****' type='password' />
-      </div>
-      <Button className='w-full h-12 mt-2'>Login</Button> */}
+      {error && (
+         <Alert variant="destructive">
+         <RiAlertLine  className="h-4 w-4" />
+         <AlertTitle>Error</AlertTitle>
+         <AlertDescription>
+           {error}
+         </AlertDescription>
+       </Alert>
+      )}
        <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-2">
         <FormField
@@ -44,10 +63,10 @@ const Login = () => {
             <FormItem>
               <FormLabel>Email adress</FormLabel>
               <FormControl>
-                <Input placeholder="example@gmail.com" {...field} />
+                <Input placeholder="example@gmail.com" {...field} disabled={isLoading}/>
               </FormControl>
               <FormDescription>
-                This is your public display name.
+               {error}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -60,14 +79,14 @@ const Login = () => {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input placeholder="******" {...field} />
+                <Input placeholder="******" {...field}  disabled={isLoading}/>
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
         <div>
-        <Button type="submit" className='h-12 w-full mt-2'>Submit</Button>
+        <Button type="submit" className='h-12 w-full mt-2' disabled={isLoading}>Submit</Button>
         </div>
       </form>
     </Form>

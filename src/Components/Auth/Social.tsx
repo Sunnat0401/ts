@@ -1,8 +1,16 @@
 import { Separator } from "@radix-ui/react-dropdown-menu"
 import { Button } from "../ui/button"
 import { FaGithub, FaGoogle } from "react-icons/fa6"
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
 
 const Social = () => {
+  const [isLoading, setIsLoading] = useState(false)
+  const navigate = useNavigate()
+
+  const onGoogle =() =>{
+    setIsLoading(true)
+  }
   return (
     <>
       <Separator className="my-3"/>
