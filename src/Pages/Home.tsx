@@ -3,17 +3,46 @@ import { featuredItems, programs } from "@/Const"
 import Man from '../assets/men.png'
 import { Card } from "@/Components/ui/card"
 import { FaArrowRightLong } from "react-icons/fa6"
-import { Link } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
+import { useUserState } from "@/Store/User.store"
+import { CgGym } from "react-icons/cg"
+import { LogOut } from "lucide-react"
+import { auth } from "@/Firebase/Firebase"
 const Home = () => {
+   const navigate = useNavigate()
+  const {user, setUser} = useUserState()
+  const onLogaut =()=>{
+    auth.signOut().then(()=>{
+  setUser(null)
+  navigate("/auth")
+    })
+    }
   return (
     <>
     <div className=" max-w-6xl w-full h-screen flex justify-between items-center  container  mx-auto">
      <div className="max-w-xl  flex h-full flex-col justify-center">
         <h1 className="text-9xl font-semibold uppercase"> Workout with me </h1>
         <p className="text-muted-foreground"> A huge selection of health end fitness content , healthy recipes and transformation stories to help you get fit and stay fit !</p>
+        {user ? (
+          <div className="flex gap-4">
+            <Link to={"/dashboard"}>
+                <Button className="w-fit mt-6 font-bold h-12 " size={"lg"}>
+                 <span>Go to GYM</span>
+                 <CgGym className="h-5 w-5 ml-2"/>
+                </Button>
+            </Link>
+            <Button className="w-fit mt-6 font-bold h-12 " variant={"destructive"} size={"lg"}
+            onClick={onLogaut}>
+                 <span>Logout</span>
+                 <LogOut className="h-5 w-5 ml-2"/>
+                </Button>
+          </div>
+        ) :(
         <Link to={"/auth"}>
         <Button className="w-fit mt-6 font-bold h-12 " size={'lg'}>Join club now </Button>
         </Link>
+
+        )}
         <div className="mt-24">
           <p className="text-muted-foreground">AS FEATURED IN </p>
           <div className="flex items-center gap-4 mt-2">
