@@ -12,3 +12,7 @@ export const registerScheme  = z.object({
     message: "Passwords do not match",
     path:['confirmPaswword']
 })
+
+export const taskScheme = z.object({
+    title:z.string().min(5),
+})
